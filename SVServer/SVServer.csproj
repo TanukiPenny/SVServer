@@ -9,6 +9,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SVCommon\SVCommon\SVCommon.csproj" />
+      <ProjectReference Include="..\Yggdrasi\Yggdrasil\Yggdrasil.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MessagePack" Version="2.5.140" />
     </ItemGroup>
 
 </Project>

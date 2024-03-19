@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SVServer", "SVServer\SVServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SVCommon", "SVCommon\SVCommon\SVCommon.csproj", "{A1768FA5-43BE-4868-814B-21BF8D197418}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yggdrasil", "Yggdrasi\Yggdrasil\Yggdrasil.csproj", "{299CF902-E047-47C8-8138-2F57EB5E4BF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{A1768FA5-43BE-4868-814B-21BF8D197418}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1768FA5-43BE-4868-814B-21BF8D197418}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1768FA5-43BE-4868-814B-21BF8D197418}.Release|Any CPU.Build.0 = Release|Any CPU
+		{299CF902-E047-47C8-8138-2F57EB5E4BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{299CF902-E047-47C8-8138-2F57EB5E4BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{299CF902-E047-47C8-8138-2F57EB5E4BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{299CF902-E047-47C8-8138-2F57EB5E4BF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
