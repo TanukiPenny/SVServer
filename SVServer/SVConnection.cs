@@ -11,7 +11,7 @@ public class SVConnection : TcpConnection
 {
     public string Nick;
     public DateTime ConnectionOpened = DateTime.Now;
-    public bool Host = false;
+    public bool IsHost = false;
     public bool UserDisconnected;
     public bool IsAuthenticatedSuccessfully;
 
@@ -26,6 +26,11 @@ public class SVConnection : TcpConnection
     public SVConnection()
     {
         _framer.MessageReceived += FramerReceiveData;
+    }
+
+    public void FillUserInfo(string nick)
+    {
+        Nick = nick;
     }
 
     public void Send<T>(T obj, MessageType packetId)
