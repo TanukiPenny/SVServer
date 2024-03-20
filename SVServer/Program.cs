@@ -72,7 +72,7 @@ internal class Program
 
         foreach (SVConnection connection in ConnectedUsers)
         {
-            connection.Send();
+            // connection.Send();
         }
         
         ConnectedUsers.Add(conn);
