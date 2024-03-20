@@ -1,4 +1,6 @@
-﻿using SVServer;
+﻿using SVCommon;
+using SVCommon.Packet;
+using SVServer;
 using Yggdrasil.Network.TCP;
 
 internal class Program
@@ -70,9 +72,13 @@ internal class Program
 
         conn.IsAuthenticatedSuccessfully = true;
 
+        var userJoin = new UserJoin
+        {
+            Nick = conn.Nick
+        };
         foreach (SVConnection connection in ConnectedUsers)
         {
-            // connection.Send();
+            connection.Send(userJoin, MessageType.UserJoin);
         }
         
         ConnectedUsers.Add(conn);
