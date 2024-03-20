@@ -3,17 +3,18 @@ using Yggdrasil.Network.TCP;
 
 internal class Program
 {
-    public static readonly List<SVConnection> ConnectedUsers = new();
-    public static readonly List<SVConnection> UnauthedUsers = new();
+    public static List<SVConnection> ConnectedUsers = new();
+    public static List<SVConnection> UnauthedUsers = new();
 
     public static TcpConnectionAcceptor<SVConnection> TcpConnectionAcceptor;
     public static EventListener EventListener;
-    
+
     public static Thread ServerLoopThread;
-    
+
     public static bool ShutDown = false;
-    
-    private static DateTime lastTestPingCheck = DateTime.Now;
+
+    private static DateTime _lastUnauthUserCheck = DateTime.Now;
+
 
     public static void Main(string[] args)
     {
@@ -29,7 +30,7 @@ internal class Program
 
     public static void AddConnection(SVConnection conn)
     {
-        conn.Closed += (connection, type) => { DisconnectUser(conn); };
+        conn.Closed += (_, _) => { DisconnectUser(conn); };
 
         lock (UnauthedUsers)
         {
@@ -38,30 +39,14 @@ internal class Program
         }
     }
 
-    public void UserAuthed(SVConnection conn)
+    public static void DisconnectUser(SVConnection conn, string message = null)
     {
-        lock (UnauthedUsers)
-        {
-            UnauthedUsers.Remove(conn);
-        }
-
-        conn.IsAuthenticatedSuccessfully = true;
-
-        ConnectedUsers.Add(conn);
-    }
-
-    public static void DisconnectUser(SVConnection conn)
-    {
-        if (conn == null || conn.UserDisconnected) return;
-
         conn.UserDisconnected = true;
 
-
-        if (conn.Status == ConnectionStatus.Open)
+        if (message != null)
         {
-            conn.Close();
+            // Send DisconnectMessage
         }
-
 
         if (conn.IsAuthenticatedSuccessfully)
         {
@@ -76,19 +61,46 @@ internal class Program
         }
     }
 
+    public static void UserAuthed(SVConnection conn)
+    {
+        lock (UnauthedUsers)
+        {
+            UnauthedUsers.Remove(conn);
+        }
+
+        conn.IsAuthenticatedSuccessfully = true;
+
+        foreach (SVConnection connection in ConnectedUsers)
+        {
+            connection.Send();
+        }
+        
+        ConnectedUsers.Add(conn);
+    }
+
     private static void ServerLoop()
     {
         while (!ShutDown)
         {
-            if (DateTime.Now.Subtract(lastTestPingCheck).TotalMilliseconds >= 5000)
+            if (DateTime.Now.Subtract(_lastUnauthUserCheck).TotalMilliseconds >= 10000)
             {
-                foreach (SVConnection connection in UnauthedUsers)
+                lock (UnauthedUsers)
                 {
-                    connection.SendPing();
+                    SVConnection[] usersToCheck = UnauthedUsers.ToArray();
+                    
+                    foreach (SVConnection conn in usersToCheck)
+                    {
+                        if (DateTime.Now.Subtract(conn.ConnectionOpened).TotalSeconds <= 10)
+                            continue;
+
+                        Console.WriteLine($"Kicked user from {conn.Address} for not sending login within 10 seconds");
+
+                        DisconnectUser(conn, "Login timeout reached!");
+                    }
                 }
-                Console.WriteLine("Ping Sent!");
-                lastTestPingCheck = DateTime.Now;
             }
+
+            Thread.Sleep(900);
         }
     }
 }

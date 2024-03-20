@@ -18,7 +18,19 @@ public class EventListener : PacketHandler<SVConnection>
 
     public override void OnLogin(SVConnection conn, Login login)
     {
-        throw new NotImplementedException();
+        if (conn.IsAuthenticatedSuccessfully)
+        {
+            return;
+        }
+        
+        if (Program.ConnectedUsers.Exists(c => c.Nick == login.Nick))
+        {
+            Program.DisconnectUser(conn, "User already exists!");
+            Console.WriteLine($"{login.Nick} from {conn.Address} tried to connect with taken nick!");
+        }
+
+        Program.UserAuthed(conn);
+        Console.WriteLine($"Login approved from {conn.Address} with nick {login.Nick}");
     }
 
     public override void OnSerializationException(MessagePackSerializationException exception, int packetID)

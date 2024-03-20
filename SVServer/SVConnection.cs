@@ -33,7 +33,6 @@ public class SVConnection : TcpConnection
         List<byte> bytes = new();
         bytes.AddRange(BitConverter.GetBytes((int)packetId));
         bytes.AddRange(MessagePackSerializer.Serialize(obj));
-
         Send(_framer.Frame(bytes.ToArray()));
     }
     
