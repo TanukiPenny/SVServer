@@ -86,7 +86,7 @@ internal class Program
                 {
                     connection.SendPing();
                 }
-                Console.WriteLine("Ping sent...");
+                Console.WriteLine("Ping Sent!");
                 lastTestPingCheck = DateTime.Now;
             }
         }

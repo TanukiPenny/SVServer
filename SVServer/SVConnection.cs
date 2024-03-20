@@ -14,15 +14,15 @@ public class SVConnection : TcpConnection
     public bool Host = false;
     public bool UserDisconnected;
     public bool IsAuthenticatedSuccessfully;
-    
+
     private readonly LengthPrefixFramer _framer = new(20000);
-    
+
     protected override void ReceiveData(byte[] buffer, int length)
     {
-        //if (UserDisconnected) return;
+        if (UserDisconnected) return;
         _framer.ReceiveData(buffer, length);
     }
-    
+
     public SVConnection()
     {
         _framer.MessageReceived += FramerReceiveData;
@@ -30,30 +30,20 @@ public class SVConnection : TcpConnection
 
     public void Send<T>(T obj, MessageType packetId)
     {
-        try
-        {
-            List<byte> bytes = new();
-            bytes.Add(0);
-            bytes.AddRange(BitConverter.GetBytes((int)packetId));
-            bytes.AddRange(MessagePackSerializer.Serialize(obj));
-            
-            Send(_framer.Frame(bytes.ToArray()));
-        }
-        catch (Exception e)
-        {
-            Log.Error(e);
-        }
-    }
-
-    public void SendPing()
-    {
         List<byte> bytes = new();
-        bytes.Add(0);
-        bytes.AddRange(BitConverter.GetBytes((int)MessageType.Ping));
-        
+        bytes.AddRange(BitConverter.GetBytes((int)packetId));
+        bytes.AddRange(MessagePackSerializer.Serialize(obj));
+
         Send(_framer.Frame(bytes.ToArray()));
     }
     
+    public void SendPing()
+    {
+        List<byte> bytes = new();
+        bytes.AddRange(BitConverter.GetBytes((int)MessageType.Ping));
+        Send(_framer.Frame(bytes.ToArray()));
+    }
+
     private void FramerReceiveData(byte[] bytes)
     {
         if (bytes.Length < sizeof(int))
