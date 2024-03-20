@@ -27,6 +27,7 @@ public class EventListener : PacketHandler<SVConnection>
         {
             Program.DisconnectUser(conn, "User already exists!");
             Console.WriteLine($"{login.Nick} from {conn.Address} tried to connect with taken nick!");
+            return;
         }
 
         Program.UserAuthed(conn);
