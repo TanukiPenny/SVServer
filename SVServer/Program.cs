@@ -47,7 +47,11 @@ internal static class Program
 
         if (message != null)
         {
-            // Send DisconnectMessage
+            var disconnectMessage = new DisconnectMessage
+            {
+                Message = message
+            };
+            conn.Send(disconnectMessage, MessageType.DisconnectMessage);
         }
 
         if (conn.IsAuthenticatedSuccessfully)
@@ -61,6 +65,23 @@ internal static class Program
                 UnAuthedUsers.Remove(conn);
             }
         }
+
+        if (conn.IsHost)
+        {
+            conn.IsHost = false;
+            var oldestConnection = ConnectedUsers.OrderBy(connection => connection.ConnectionOpened).First();
+            oldestConnection.IsHost = true;
+            var hostChange = new HostChange
+            {
+                Nick = oldestConnection.Nick!
+            };
+            foreach (SvConnection connection in ConnectedUsers)
+            {
+                connection.Send(hostChange, MessageType.HostChange);
+            }
+        }
+        
+        conn.Close();
     }
 
     public static void UserAuthed(SvConnection conn)
