@@ -16,6 +16,25 @@ public class EventListener : PacketHandler<SvConnection>
         Console.WriteLine(msg);
     }
 
+
+    public override void OnNewMedia(SvConnection conn, NewMedia newMedia)
+    {
+        if (!conn.IsHost) return;
+        foreach (SvConnection connection in Program.ConnectedUsers)
+        {
+            connection.Send(newMedia, MessageType.NewMedia);
+        }
+    }
+
+    public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
+    {
+        if (!conn.IsHost) return;
+        foreach (SvConnection connection in Program.ConnectedUsers)
+        {
+            connection.Send(timeSync, MessageType.TimeSync);
+        }
+    }
+
     public override void OnLogin(SvConnection conn, Login login)
     {
         if (conn.IsAuthenticatedSuccessfully)
