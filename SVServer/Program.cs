@@ -1,47 +1,46 @@
 ﻿using SVCommon;
 using SVCommon.Packet;
-using SVServer;
 using Yggdrasil.Network.TCP;
 
-internal class Program
+namespace SVServer;
+
+internal static class Program
 {
-    public static List<SVConnection> ConnectedUsers = new();
-    public static List<SVConnection> UnauthedUsers = new();
+    public static readonly List<SvConnection> ConnectedUsers = new();
+    private static readonly List<SvConnection> UnAuthedUsers = new();
 
-    public static TcpConnectionAcceptor<SVConnection> TcpConnectionAcceptor;
-    public static EventListener EventListener;
+    private static TcpConnectionAcceptor<SvConnection>? _tcpConnectionAcceptor;
+    public static EventListener? EventListener;
 
-    public static Thread ServerLoopThread;
+    private static Thread? _serverLoopThread;
 
-    public static bool ShutDown = false;
-
-    private static DateTime _lastUnauthUserCheck = DateTime.Now;
+    private static readonly DateTime LastAuthUserCheck = DateTime.Now;
 
 
     public static void Main(string[] args)
     {
         EventListener = new EventListener();
 
-        TcpConnectionAcceptor = new TcpConnectionAcceptor<SVConnection>("127.0.0.1", 9052);
-        TcpConnectionAcceptor.ConnectionAccepted += AddConnection;
-        TcpConnectionAcceptor.Listen();
+        _tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("127.0.0.1", 9052);
+        _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
+        _tcpConnectionAcceptor.Listen();
 
-        ServerLoopThread = new Thread(ServerLoop);
-        ServerLoopThread.Start();
+        _serverLoopThread = new Thread(ServerLoop);
+        _serverLoopThread.Start();
     }
 
-    public static void AddConnection(SVConnection conn)
+    private static void AddConnection(SvConnection conn)
     {
         conn.Closed += (_, _) => { DisconnectUser(conn); };
 
-        lock (UnauthedUsers)
+        lock (UnAuthedUsers)
         {
-            UnauthedUsers.Add(conn);
+            UnAuthedUsers.Add(conn);
             Console.WriteLine($"User Connected: {conn.Address}");
         }
     }
 
-    public static void DisconnectUser(SVConnection conn, string message = null)
+    public static void DisconnectUser(SvConnection conn, string? message = null)
     {
         conn.UserDisconnected = true;
 
@@ -56,18 +55,18 @@ internal class Program
         }
         else
         {
-            lock (UnauthedUsers)
+            lock (UnAuthedUsers)
             {
-                UnauthedUsers.Remove(conn);
+                UnAuthedUsers.Remove(conn);
             }
         }
     }
 
-    public static void UserAuthed(SVConnection conn)
+    public static void UserAuthed(SvConnection conn)
     {
-        lock (UnauthedUsers)
+        lock (UnAuthedUsers)
         {
-            UnauthedUsers.Remove(conn);
+            UnAuthedUsers.Remove(conn);
         }
 
         conn.IsAuthenticatedSuccessfully = true;
@@ -76,7 +75,7 @@ internal class Program
         {
             Nick = conn.Nick
         };
-        foreach (SVConnection connection in ConnectedUsers)
+        foreach (SvConnection connection in ConnectedUsers)
         {
             connection.Send(userJoin, MessageType.UserJoin);
         }
@@ -86,15 +85,15 @@ internal class Program
 
     private static void ServerLoop()
     {
-        while (!ShutDown)
+        while (true)
         {
-            if (DateTime.Now.Subtract(_lastUnauthUserCheck).TotalMilliseconds >= 10000)
+            if (DateTime.Now.Subtract(LastAuthUserCheck).TotalMilliseconds >= 10000)
             {
-                lock (UnauthedUsers)
+                lock (UnAuthedUsers)
                 {
-                    SVConnection[] usersToCheck = UnauthedUsers.ToArray();
+                    SvConnection[] usersToCheck = UnAuthedUsers.ToArray();
                     
-                    foreach (SVConnection conn in usersToCheck)
+                    foreach (SvConnection conn in usersToCheck)
                     {
                         if (DateTime.Now.Subtract(conn.ConnectionOpened).TotalSeconds <= 10)
                             continue;
@@ -108,5 +107,6 @@ internal class Program
 
             Thread.Sleep(900);
         }
+        // ReSharper disable once FunctionNeverReturns
     }
 }

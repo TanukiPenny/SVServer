@@ -4,19 +4,19 @@ using SVCommon.Packet;
 
 namespace SVServer;
 
-public class EventListener : PacketHandler<SVConnection>
+public class EventListener : PacketHandler<SvConnection>
 {
-    public override void OnPing(SVConnection conn)
+    public override void OnPing(SvConnection conn)
     {
         Console.WriteLine("Ping Received!");
     }
     
-    public override void OnBasicMessage(SVConnection conn, BasicMessage msg)
+    public override void OnBasicMessage(SvConnection conn, BasicMessage msg)
     {
         Console.WriteLine(msg);
     }
 
-    public override void OnLogin(SVConnection conn, Login login)
+    public override void OnLogin(SvConnection conn, Login login)
     {
         if (conn.IsAuthenticatedSuccessfully)
         {
@@ -28,6 +28,7 @@ public class EventListener : PacketHandler<SVConnection>
         if (Program.ConnectedUsers.Exists(c => c.Nick == login.Nick))
         {
             loginResponse.Success = false;
+            loginResponse.Host = false;
             conn.Send(loginResponse, MessageType.LoginResponse);
             Program.DisconnectUser(conn, "User already exists!");
             Console.WriteLine($"{login.Nick} from {conn.Address} tried to connect with taken nick!");
@@ -38,25 +39,33 @@ public class EventListener : PacketHandler<SVConnection>
         Program.UserAuthed(conn);
         Console.WriteLine($"Login approved from {conn.Address} with nick {login.Nick}");
         loginResponse.Success = true;
-        conn.Send(loginResponse, MessageType.LoginResponse);
+        
 
         if (Program.ConnectedUsers.Count == 0)
         {
             conn.IsHost = true;
+            loginResponse.Host = true;
         }
+        else
+        {
+            conn.IsHost = false;
+            loginResponse.Host = false;
+        }
+        
+        conn.Send(loginResponse, MessageType.LoginResponse);
     }
 
-    public override void OnSerializationException(MessagePackSerializationException exception, int packetID)
+    public override void OnSerializationException(MessagePackSerializationException exception, int packetId)
     {
         Console.WriteLine(exception);  
     }
 
-    public override void OnByteLengthMismatch(SVConnection conn, int readBytes, int totalBytes)
+    public override void OnByteLengthMismatch(SvConnection conn, int readBytes, int totalBytes)
     {
         Console.WriteLine($"Byte Length Mismatch - Read: {readBytes}, Total: {totalBytes}");  
     }
 
-    public override void OnPacketHandlerException(Exception exception, int packetID)
+    public override void OnPacketHandlerException(Exception exception, int packetId)
     {
         Console.WriteLine(exception);   
     }

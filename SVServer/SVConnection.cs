@@ -1,17 +1,15 @@
-using System.Text;
 using MessagePack;
 using SVCommon;
-using Yggdrasil.Logging;
 using Yggdrasil.Network.Framing;
 using Yggdrasil.Network.TCP;
 
 namespace SVServer;
 
-public class SVConnection : TcpConnection
+public class SvConnection : TcpConnection
 {
-    public string Nick;
+    public string? Nick;
     public DateTime ConnectionOpened = DateTime.Now;
-    public bool IsHost = false;
+    public bool IsHost;
     public bool UserDisconnected;
     public bool IsAuthenticatedSuccessfully;
 
@@ -23,12 +21,12 @@ public class SVConnection : TcpConnection
         _framer.ReceiveData(buffer, length);
     }
 
-    public SVConnection()
+    public SvConnection()
     {
         _framer.MessageReceived += FramerReceiveData;
     }
 
-    public void FillUserInfo(string nick)
+    public void FillUserInfo(string? nick)
     {
         Nick = nick;
     }
@@ -61,6 +59,6 @@ public class SVConnection : TcpConnection
 
         Array.Copy(bytes, sizeof(int), finalBytes, 0, finalBytes.Length);
 
-        Program.EventListener.HandlePacket(this, finalBytes, packetId);
+        Program.EventListener?.HandlePacket(this, finalBytes, packetId);
     }
 }
