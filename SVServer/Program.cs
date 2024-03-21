@@ -15,6 +15,7 @@ internal static class Program
     private static Thread? _serverLoopThread;
 
     private static readonly DateTime LastAuthUserCheck = DateTime.Now;
+    private static readonly DateTime LastPingCheck = DateTime.Now;
 
 
     public static void Main(string[] args)
@@ -102,6 +103,18 @@ internal static class Program
 
                         DisconnectUser(conn, "Login timeout reached!");
                     }
+                }
+            }
+            
+            if (DateTime.Now.Subtract(LastPingCheck).TotalMilliseconds >= 10000)
+            {
+                foreach (SvConnection connection in ConnectedUsers)
+                {
+                    if (DateTime.Now.Subtract(connection.LastPingTime).TotalMilliseconds >= 30000)
+                    {
+                        DisconnectUser(connection, "Client stopped responding to pings");
+                    }
+                    connection.SendPing();
                 }
             }
 

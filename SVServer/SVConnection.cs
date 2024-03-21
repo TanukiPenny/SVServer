@@ -12,6 +12,7 @@ public class SvConnection : TcpConnection
     public bool IsHost;
     public bool UserDisconnected;
     public bool IsAuthenticatedSuccessfully;
+    public DateTime LastPingTime = DateTime.Now;
 
     private readonly LengthPrefixFramer _framer = new(20000);
 
