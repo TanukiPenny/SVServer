@@ -139,7 +139,7 @@ internal static class Program
                 }
             }
 
-            Thread.Sleep(900);
+            Thread.Sleep(1000);
         }
         // ReSharper disable once FunctionNeverReturns
     }

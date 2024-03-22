@@ -53,13 +53,7 @@ public class EventListener : PacketHandler<SvConnection>
             Console.WriteLine($"{login.Nick} from {conn.Address} tried to connect with taken nick!");
             return;
         }
-
-        conn.FillUserInfo(login.Nick);
-        Program.UserAuthed(conn);
-        Console.WriteLine($"Login approved from {conn.Address} with nick {login.Nick}");
-        loginResponse.Success = true;
         
-
         if (Program.ConnectedUsers.Count == 0)
         {
             conn.IsHost = true;
@@ -70,6 +64,11 @@ public class EventListener : PacketHandler<SvConnection>
             conn.IsHost = false;
             loginResponse.Host = false;
         }
+
+        conn.FillUserInfo(login.Nick);
+        Program.UserAuthed(conn);
+        Console.WriteLine($"Login approved from {conn.Address} with nick {login.Nick}");
+        loginResponse.Success = true;
         
         conn.Send(loginResponse, MessageType.LoginResponse);
     }
