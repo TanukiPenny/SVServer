@@ -7,7 +7,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["SVServer/SVServer.csproj", "SVServer/"]
 COPY ["SVCommon/SVCommon/SVCommon.csproj", "SVCommon/SVCommon/"]
-COPY ["Yggdrasil/Yggdrasil/Yggdrasil.csproj", "Yggdrasil/Yggdrasil/"]
+COPY ["Yggdrasil/Yggdrasil.csproj", "Yggdrasil/Yggdrasil/"]
 RUN dotnet restore "SVServer/SVServer.csproj"
 COPY . .
 WORKDIR "/src/SVServer"
