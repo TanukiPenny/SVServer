@@ -1,8 +1,0 @@
-﻿services:
-  svserver:
-    image: svserver
-    ports:
-      - 9052:9052
-    build:
-      context: .
-      dockerfile: SVServer/Dockerfile
