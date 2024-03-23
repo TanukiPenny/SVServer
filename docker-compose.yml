@@ -7,4 +7,4 @@ services:
     - 3306:9052
     build:
       context: .
-      dockerfile: Dockerfile.dev      
+      dockerfile: Dockerfile    
