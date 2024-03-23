@@ -4,7 +4,7 @@ WORKDIR /src
 COPY . .
 WORKDIR "/src/SVServer"
 
-RUN dotnet publish "SVServer.csproj" -c Debug -o /app/publish
+RUN dotnet publish "SVServer/SVServer.csproj" -c Debug -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0.101-alpine3.19
 WORKDIR /app
