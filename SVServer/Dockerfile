@@ -2,23 +2,22 @@
 USER $APP_UID
 WORKDIR /app
 
+RUN git submodule update --init --recursive
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["SVServer/SVServer.csproj", "SVServer/"]
 COPY ["SVCommon/SVCommon/SVCommon.csproj", "SVCommon/SVCommon/"]
-COPY ["Yggdrasil.csproj", "Yggdrasil/Yggdrasil/"]
+COPY ["Yggdrasil/Yggdrasil/Yggdrasil.csproj", "Yggdrasil/Yggdrasil/"]
 RUN dotnet restore "SVServer/SVServer.csproj"
-RUN dotnet restore "Yggdrasil/Yggdrasil.csproj"
 COPY . .
 WORKDIR "/src/SVServer"
 RUN dotnet build "SVServer.csproj" -c $BUILD_CONFIGURATION -o /app/build
-RUN dotnet build "Yggdrasil.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "SVServer.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-RUN dotnet publish "Yggdrasil.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
