@@ -1,6 +1,0 @@
-[submodule "SVCommon"]
-	path = SVCommon
-	url = https://github.com/TanukiPenny/SVCommon.git
-[submodule "Yggdrasil"]
-	path = Yggdrasil
-	url = https://github.com/TanukiPenny/Yggdrasil.git
