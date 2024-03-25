@@ -25,9 +25,23 @@ internal static class Program
         _tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("15.204.205.117", 9052);
         _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
         _tcpConnectionAcceptor.Listen();
+        _tcpConnectionAcceptor.AcceptionException += TcpConnectionAcceptorOnAcceptionException;
+        _tcpConnectionAcceptor.ConnectionClosed += TcpConnectionAcceptorOnConnectionClosed;
+        
+        Console.WriteLine("awa");
 
         _serverLoopThread = new Thread(ServerLoop);
         _serverLoopThread.Start();
+    }
+
+    private static void TcpConnectionAcceptorOnConnectionClosed(SvConnection arg1, ConnectionCloseType arg2)
+    {
+        Console.WriteLine(arg2);
+    }
+
+    private static void TcpConnectionAcceptorOnAcceptionException(Exception obj)
+    {
+        Console.WriteLine(obj);
     }
 
     private static void AddConnection(SvConnection conn)
