@@ -3,6 +3,8 @@
     image: svserver
     ports:
       - 3306:9052
+    expose:
+      - 9052
     build:
       context: .
       dockerfile: SVServer/Dockerfile
