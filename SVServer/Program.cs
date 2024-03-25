@@ -22,7 +22,7 @@ internal static class Program
     {
         EventListener = new EventListener();
 
-        _tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("127.0.0.1", 9052);
+        _tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("15.204.205.117", 9052);
         _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
         _tcpConnectionAcceptor.Listen();
 
