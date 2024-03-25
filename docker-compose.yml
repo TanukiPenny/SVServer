@@ -1,10 +1,8 @@
-version: "3"
-services:
-  server:
-    restart: always
-    pull_policy: build
+﻿services:
+  svserver:
+    image: svserver
     ports:
-    - 3306:9052
+      - 3306:9052
     build:
       context: .
-      dockerfile: Dockerfile.dev      
+      dockerfile: SVServer/Dockerfile
