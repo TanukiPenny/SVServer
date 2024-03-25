@@ -20,15 +20,17 @@ internal static class Program
 
     public static void Main(string[] args)
     {
+        Console.WriteLine("awa");
+        
         EventListener = new EventListener();
 
-        _tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("15.204.205.117", 9052);
+        _tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("127.0.0.1", 9052);
         _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
         _tcpConnectionAcceptor.Listen();
         _tcpConnectionAcceptor.AcceptionException += TcpConnectionAcceptorOnAcceptionException;
         _tcpConnectionAcceptor.ConnectionClosed += TcpConnectionAcceptorOnConnectionClosed;
         
-        Console.WriteLine("awa");
+        Console.WriteLine("awab");
 
         _serverLoopThread = new Thread(ServerLoop);
         _serverLoopThread.Start();
