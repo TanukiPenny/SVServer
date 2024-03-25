@@ -24,11 +24,11 @@ internal static class Program
         
         EventListener = new EventListener();
 
-        /*_tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("", 9052);
+        _tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("172.21.0.2", 9052);
         _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
         _tcpConnectionAcceptor.AcceptionException += TcpConnectionAcceptorOnAcceptionException;
         _tcpConnectionAcceptor.ConnectionClosed += TcpConnectionAcceptorOnConnectionClosed;
-        _tcpConnectionAcceptor.Listen();*/
+        _tcpConnectionAcceptor.Listen();
 
         _serverLoopThread = new Thread(ServerLoop);
         _serverLoopThread.Start();
