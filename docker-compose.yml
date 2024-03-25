@@ -3,8 +3,8 @@
     image: server
     ports:
       - 9052:9052
-    expose:
-      - 9052
+    restart: always
+    pull_policy: build
     build:
       context: .
       dockerfile: SVServer/Dockerfile
