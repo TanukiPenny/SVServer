@@ -1,6 +1,6 @@
 ﻿services:
   svserver:
-    image: svserver
+    image: server
     ports:
       - 9052:9052
     expose:
