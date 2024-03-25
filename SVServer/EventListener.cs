@@ -19,7 +19,8 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnNewMedia(SvConnection conn, NewMedia newMedia)
     {
-        if (!conn.IsHost) return;
+        if (conn != Program.State.Host) return;
+        Program.State.CurrentMedia = newMedia.Uri;
         foreach (SvConnection connection in Program.ConnectedUsers)
         {
             connection.Send(newMedia, MessageType.NewMedia);
@@ -28,7 +29,8 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
     {
-        if (!conn.IsHost) return;
+        if (conn != Program.State.Host) return;
+        Program.State.CurrentMediaTime = timeSync.Time;
         foreach (SvConnection connection in Program.ConnectedUsers)
         {
             connection.Send(timeSync, MessageType.TimeSync);
@@ -40,6 +42,11 @@ public class EventListener : PacketHandler<SvConnection>
         if (conn.IsAuthenticatedSuccessfully)
         {
             return;
+        }
+
+        if (Program.ConnectedUsers.Count >= 10)
+        {
+            Program.DisconnectUser(conn, "Server is full, please try again later!");
         }
 
         var loginResponse = new LoginResponse();
@@ -56,12 +63,11 @@ public class EventListener : PacketHandler<SvConnection>
         
         if (Program.ConnectedUsers.Count == 0)
         {
-            conn.IsHost = true;
+            Program.State.Host = conn;
             loginResponse.Host = true;
         }
         else
         {
-            conn.IsHost = false;
             loginResponse.Host = false;
         }
 
@@ -71,6 +77,13 @@ public class EventListener : PacketHandler<SvConnection>
         loginResponse.Success = true;
         
         conn.Send(loginResponse, MessageType.LoginResponse);
+
+        if (Program.State.CurrentMedia == null) return;
+        var newMedia = new NewMedia
+        {
+            Uri = Program.State.CurrentMedia
+        };
+        conn.Send(newMedia, MessageType.NewMedia);
     }
 
     public override void OnSerializationException(MessagePackSerializationException exception, int packetId)

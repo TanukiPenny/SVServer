@@ -9,7 +9,6 @@ public class SvConnection : TcpConnection
 {
     public string? Nick;
     public DateTime ConnectionOpened = DateTime.Now;
-    public bool IsHost;
     public bool UserDisconnected;
     public bool IsAuthenticatedSuccessfully;
     public DateTime LastPingTime = DateTime.Now;

@@ -9,8 +9,9 @@ internal static class Program
     public static readonly List<SvConnection> ConnectedUsers = new();
     private static readonly List<SvConnection> UnAuthedUsers = new();
 
-    private static TcpConnectionAcceptor<SvConnection>? _tcpConnectionAcceptor;
-    public static EventListener? EventListener;
+    private static TcpConnectionAcceptor<SvConnection> _tcpConnectionAcceptor = new("172.21.0.2", 9052);
+    public static EventListener EventListener = new();
+    public static State State = new();
 
     private static Thread? _serverLoopThread;
 
@@ -22,9 +23,6 @@ internal static class Program
     {
         Console.WriteLine("Server Starting");
         
-        EventListener = new EventListener();
-
-        _tcpConnectionAcceptor = new TcpConnectionAcceptor<SvConnection>("172.21.0.2", 9052);
         _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
         _tcpConnectionAcceptor.AcceptionException += TcpConnectionAcceptorOnAcceptionException;
         _tcpConnectionAcceptor.ConnectionClosed += TcpConnectionAcceptorOnConnectionClosed;
@@ -80,11 +78,10 @@ internal static class Program
             }
         }
 
-        if (conn.IsHost)
+        if (conn == State.Host)
         {
-            conn.IsHost = false;
             var oldestConnection = ConnectedUsers.OrderBy(connection => connection.ConnectionOpened).First();
-            oldestConnection.IsHost = true;
+            State.Host = oldestConnection;
             var hostChange = new HostChange
             {
                 Nick = oldestConnection.Nick!
