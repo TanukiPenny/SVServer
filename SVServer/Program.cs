@@ -32,9 +32,9 @@ internal static class Program
         _serverLoopThread.Start();
     }
 
-    private static void TcpConnectionAcceptorOnConnectionClosed(SvConnection arg1, ConnectionCloseType arg2)
+    private static void TcpConnectionAcceptorOnConnectionClosed(SvConnection conn, ConnectionCloseType closeType)
     {
-        Console.WriteLine(arg2);
+        Console.Write($"Connection with {conn.Address} was {closeType.ToString().ToLower()}");
     }
 
     private static void TcpConnectionAcceptorOnAcceptionException(Exception obj)
@@ -49,7 +49,7 @@ internal static class Program
         lock (UnAuthedUsers)
         {
             UnAuthedUsers.Add(conn);
-            Console.WriteLine($"User Connected: {conn.Address}");
+            Console.WriteLine($"User connected from {conn.Address}");
         }
     }
 
@@ -93,6 +93,7 @@ internal static class Program
         }
         
         conn.Close();
+        Console.WriteLine($"Disconnected user from {conn.Address}");
     }
 
     public static void UserAuthed(SvConnection conn)
@@ -114,12 +115,14 @@ internal static class Program
         }
         
         ConnectedUsers.Add(conn);
+        Console.WriteLine($"{conn.Nick} was authed");
     }
 
     private static void ServerLoop()
     {
         while (true)
         {
+            Console.WriteLine("Doing Loop");
             if (DateTime.Now.Subtract(LastAuthUserCheck).TotalMilliseconds >= 10000)
             {
                 lock (UnAuthedUsers)
