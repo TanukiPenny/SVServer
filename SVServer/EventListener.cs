@@ -9,12 +9,12 @@ public class EventListener : PacketHandler<SvConnection>
     public override void OnPing(SvConnection conn)
     {
         conn.LastPingTime = DateTime.Now;
-        Console.Write($"Ping received from {conn.Address}");
+        Console.WriteLine($"Ping received from {conn.Address}");
     }
     
     public override void OnBasicMessage(SvConnection conn, BasicMessage msg)
     {
-        Console.Write($"BasicMessage received from {conn.Address}: {msg.Message}");
+        Console.WriteLine($"BasicMessage received from {conn.Address}: {msg.Message}");
     }
 
 
@@ -26,7 +26,7 @@ public class EventListener : PacketHandler<SvConnection>
         {
             connection.Send(newMedia, MessageType.NewMedia);
         }
-        Console.Write($"BasicMessage received from {conn.Address}: {newMedia.Uri}");
+        Console.WriteLine($"BasicMessage received from {conn.Address}: {newMedia.Uri}");
     }
 
     public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
@@ -37,12 +37,12 @@ public class EventListener : PacketHandler<SvConnection>
         {
             connection.Send(timeSync, MessageType.TimeSync);
         }
-        Console.Write($"TimeSync received from {conn.Address}: {timeSync.Time}");
+        Console.WriteLine($"TimeSync received from {conn.Address}: {timeSync.Time}");
     }
 
     public override void OnLogin(SvConnection conn, Login login)
     {
-        Console.Write($"Login received from {conn.Address}: {login.Nick}");
+        Console.WriteLine($"Login received from {conn.Address}: {login.Nick}");
         if (conn.IsAuthenticatedSuccessfully)
         {
             return;

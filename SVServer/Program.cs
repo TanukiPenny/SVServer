@@ -34,7 +34,7 @@ internal static class Program
 
     private static void TcpConnectionAcceptorOnConnectionClosed(SvConnection conn, ConnectionCloseType closeType)
     {
-        Console.Write($"Connection with {conn.Address} was {closeType.ToString().ToLower()}");
+        Console.WriteLine($"Connection with {conn.Address} was {closeType.ToString().ToLower()}");
     }
 
     private static void TcpConnectionAcceptorOnAcceptionException(Exception obj)
