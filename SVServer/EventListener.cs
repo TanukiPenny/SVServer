@@ -24,9 +24,10 @@ public class EventListener : PacketHandler<SvConnection>
         Program.State.CurrentMedia = newMedia.Uri;
         foreach (SvConnection connection in Program.ConnectedUsers)
         {
+            if (Program.State.Host == conn) return;
             connection.Send(newMedia, MessageType.NewMedia);
         }
-        Console.WriteLine($"BasicMessage received from {conn.Address}: {newMedia.Uri}");
+        Console.WriteLine($"NewMedia received from {conn.Address}: {newMedia.Uri}");
     }
 
     public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
