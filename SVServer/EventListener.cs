@@ -24,6 +24,8 @@ public class EventListener : PacketHandler<SvConnection>
         
         Program.State.CurrentMedia = newMedia.Uri;
         
+        Console.WriteLine(Program.ConnectedUsers.Count);
+        
         foreach (SvConnection connection in Program.ConnectedUsers)
         {
             if (Program.State.Host == conn) continue;
