@@ -27,6 +27,7 @@ public class EventListener : PacketHandler<SvConnection>
         foreach (SvConnection connection in Program.ConnectedUsers)
         {
             if (Program.State.Host == conn) continue;
+            Console.WriteLine("Sent NewMedia");
             connection.Send(newMedia, MessageType.NewMedia);
         }
         Console.WriteLine($"NewMedia received from {conn.Address}: {newMedia.Uri}");
