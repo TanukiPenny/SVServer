@@ -122,7 +122,7 @@ internal static class Program
     {
         while (true)
         {
-            Console.WriteLine("Doing Loop");
+            // Console.WriteLine("Doing Loop");
             if (DateTime.Now.Subtract(LastAuthUserCheck).TotalMilliseconds >= 10000)
             {
                 lock (UnAuthedUsers)

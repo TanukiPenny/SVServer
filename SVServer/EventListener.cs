@@ -9,7 +9,7 @@ public class EventListener : PacketHandler<SvConnection>
     public override void OnPing(SvConnection conn)
     {
         conn.LastPingTime = DateTime.Now;
-        Console.WriteLine($"Ping received from {conn.Address}");
+        // Console.WriteLine($"Ping received from {conn.Address}");
     }
     
     public override void OnBasicMessage(SvConnection conn, BasicMessage msg)
