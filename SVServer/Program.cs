@@ -78,6 +78,15 @@ internal static class Program
             }
         }
 
+        if (ConnectedUsers.Count == 0)
+        {
+            State.CurrentMediaTime = null;
+            State.Host = null;
+            State.CurrentMedia = null;
+            Console.WriteLine("Last user disconnected state was cleared");
+            return;
+        }
+
         if (conn == State.Host)
         {
             var oldestConnection = ConnectedUsers.OrderBy(connection => connection.ConnectionOpened).First();
@@ -94,6 +103,8 @@ internal static class Program
         
         conn.Close();
         Console.WriteLine($"Disconnected user from {conn.Address}");
+        
+        
     }
 
     public static void UserAuthed(SvConnection conn)
@@ -115,7 +126,6 @@ internal static class Program
         }
         
         ConnectedUsers.Add(conn);
-        Console.WriteLine($"{conn.Nick} was authed");
     }
 
     private static void ServerLoop()

@@ -21,10 +21,12 @@ public class EventListener : PacketHandler<SvConnection>
     public override void OnNewMedia(SvConnection conn, NewMedia newMedia)
     {
         if (conn != Program.State.Host) return;
+        
         Program.State.CurrentMedia = newMedia.Uri;
+        
         foreach (SvConnection connection in Program.ConnectedUsers)
         {
-            if (Program.State.Host == conn) return;
+            if (Program.State.Host == conn) continue;
             connection.Send(newMedia, MessageType.NewMedia);
         }
         Console.WriteLine($"NewMedia received from {conn.Address}: {newMedia.Uri}");
@@ -33,11 +35,15 @@ public class EventListener : PacketHandler<SvConnection>
     public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
     {
         if (conn != Program.State.Host) return;
+        
         Program.State.CurrentMediaTime = timeSync.Time;
+        
         foreach (SvConnection connection in Program.ConnectedUsers)
         {
+            if (Program.State.Host == conn) continue;
             connection.Send(timeSync, MessageType.TimeSync);
         }
+        
         Console.WriteLine($"TimeSync received from {conn.Address}: {timeSync.Time}");
     }
 
@@ -77,10 +83,12 @@ public class EventListener : PacketHandler<SvConnection>
         }
 
         conn.FillUserInfo(login.Nick);
-        Program.UserAuthed(conn);
-        Console.WriteLine($"Login approved from {conn.Address} with nick {login.Nick}");
-        loginResponse.Success = true;
         
+        Program.UserAuthed(conn);
+        
+        Console.WriteLine($"Login approved from {conn.Address} with nick {login.Nick}");
+        
+        loginResponse.Success = true;
         conn.Send(loginResponse, MessageType.LoginResponse);
 
         if (Program.State.CurrentMedia == null) return;
@@ -89,6 +97,13 @@ public class EventListener : PacketHandler<SvConnection>
             Uri = Program.State.CurrentMedia
         };
         conn.Send(newMedia, MessageType.NewMedia);
+        
+        if (Program.State.CurrentMediaTime == null) return;
+        var timeSync = new TimeSync
+        {
+            Time = (long)Program.State.CurrentMediaTime
+        };
+        conn.Send(timeSync, MessageType.TimeSync);
     }
 
     public override void OnSerializationException(MessagePackSerializationException exception, int packetId)

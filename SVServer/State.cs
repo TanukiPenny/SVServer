@@ -4,5 +4,5 @@ public class State
 {
     public SvConnection? Host;
     public Uri? CurrentMedia;
-    public long CurrentMediaTime;
+    public long? CurrentMediaTime;
 }
