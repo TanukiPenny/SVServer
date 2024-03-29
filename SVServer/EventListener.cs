@@ -25,14 +25,9 @@ public class EventListener : PacketHandler<SvConnection>
         
         Program.State.CurrentMedia = newMedia.Uri;
 
-        if (ConnectedUsers.Count == 1)
-        {
-            Console.WriteLine("AAAAAAAAAAAA");
-        }
-        Console.WriteLine(ConnectedUsers.Count.ToString());
-        
         foreach (SvConnection connection in ConnectedUsers)
         {
+            Console.WriteLine("In loop");
             if (Program.State.Host == conn) continue;
             Console.WriteLine("Sent NewMedia");
             connection.Send(newMedia, MessageType.NewMedia);
