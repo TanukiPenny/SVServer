@@ -29,7 +29,7 @@ public class EventListener : PacketHandler<SvConnection>
         {
             Console.WriteLine("AAAAAAAAAAAA");
         }
-        Console.WriteLine(ConnectedUsers.Count);
+        Console.WriteLine(ConnectedUsers.Count.ToString());
         
         foreach (SvConnection connection in ConnectedUsers)
         {
