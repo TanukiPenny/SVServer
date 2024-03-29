@@ -6,8 +6,8 @@ namespace SVServer;
 
 internal static class Program
 {
-    public static readonly List<SvConnection> ConnectedUsers = new();
-    private static readonly List<SvConnection> UnAuthedUsers = new();
+    public static List<SvConnection> ConnectedUsers = new();
+    private static List<SvConnection> _unAuthedUsers = new();
 
     private static TcpConnectionAcceptor<SvConnection> _tcpConnectionAcceptor = new("172.21.0.2", 9052);
     public static EventListener EventListener = new();
@@ -46,9 +46,9 @@ internal static class Program
     {
         conn.Closed += (_, _) => { DisconnectUser(conn); };
 
-        lock (UnAuthedUsers)
+        lock (_unAuthedUsers)
         {
-            UnAuthedUsers.Add(conn);
+            _unAuthedUsers.Add(conn);
             Console.WriteLine($"User connected from {conn.Address}");
         }
     }
@@ -72,9 +72,9 @@ internal static class Program
         }
         else
         {
-            lock (UnAuthedUsers)
+            lock (_unAuthedUsers)
             {
-                UnAuthedUsers.Remove(conn);
+                _unAuthedUsers.Remove(conn);
             }
         }
 
@@ -109,9 +109,9 @@ internal static class Program
 
     public static void UserAuthed(SvConnection conn)
     {
-        lock (UnAuthedUsers)
+        lock (_unAuthedUsers)
         {
-            UnAuthedUsers.Remove(conn);
+            _unAuthedUsers.Remove(conn);
         }
 
         conn.IsAuthenticatedSuccessfully = true;
@@ -135,9 +135,9 @@ internal static class Program
             // Console.WriteLine("Doing Loop");
             if (DateTime.Now.Subtract(LastAuthUserCheck).TotalMilliseconds >= 10000)
             {
-                lock (UnAuthedUsers)
+                lock (_unAuthedUsers)
                 {
-                    SvConnection[] usersToCheck = UnAuthedUsers.ToArray();
+                    SvConnection[] usersToCheck = _unAuthedUsers.ToArray();
                     
                     foreach (SvConnection conn in usersToCheck)
                     {
