@@ -1,6 +1,7 @@
 using MessagePack;
 using SVCommon;
 using SVCommon.Packet;
+using static SVServer.Program;
 
 namespace SVServer;
 
@@ -24,14 +25,15 @@ public class EventListener : PacketHandler<SvConnection>
         
         Program.State.CurrentMedia = newMedia.Uri;
         
-        Console.WriteLine(Program.ConnectedUsers.Count());
+        Console.WriteLine(ConnectedUsers);
         
-        foreach (SvConnection connection in Program.ConnectedUsers)
+        foreach (SvConnection connection in ConnectedUsers)
         {
             if (Program.State.Host == conn) continue;
             Console.WriteLine("Sent NewMedia");
             connection.Send(newMedia, MessageType.NewMedia);
         }
+        
         Console.WriteLine($"NewMedia received from {conn.Address}: {newMedia.Uri}");
     }
 
@@ -41,7 +43,7 @@ public class EventListener : PacketHandler<SvConnection>
         
         Program.State.CurrentMediaTime = timeSync.Time;
         
-        foreach (SvConnection connection in Program.ConnectedUsers)
+        foreach (SvConnection connection in ConnectedUsers)
         {
             if (Program.State.Host == conn) continue;
             connection.Send(timeSync, MessageType.TimeSync);
@@ -58,24 +60,24 @@ public class EventListener : PacketHandler<SvConnection>
             return;
         }
 
-        if (Program.ConnectedUsers.Count >= 10)
+        if (ConnectedUsers.Count >= 10)
         {
-            Program.DisconnectUser(conn, "Server is full, please try again later!");
+            DisconnectUser(conn, "Server is full, please try again later!");
         }
 
         var loginResponse = new LoginResponse();
         
-        if (Program.ConnectedUsers.Exists(c => c.Nick == login.Nick))
+        if (ConnectedUsers.Exists(c => c.Nick == login.Nick))
         {
             loginResponse.Success = false;
             loginResponse.Host = false;
             conn.Send(loginResponse, MessageType.LoginResponse);
-            Program.DisconnectUser(conn, "User already exists!");
+            DisconnectUser(conn, "User already exists!");
             Console.WriteLine($"{login.Nick} from {conn.Address} tried to connect with taken nick!");
             return;
         }
         
-        if (Program.ConnectedUsers.Count == 0)
+        if (ConnectedUsers.Count == 0)
         {
             Program.State.Host = conn;
             loginResponse.Host = true;
@@ -87,7 +89,7 @@ public class EventListener : PacketHandler<SvConnection>
 
         conn.FillUserInfo(login.Nick);
         
-        Program.UserAuthed(conn);
+        UserAuthed(conn);
         
         Console.WriteLine($"Login approved from {conn.Address} with nick {login.Nick}");
         
