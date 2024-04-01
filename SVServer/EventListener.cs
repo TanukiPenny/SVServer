@@ -1,4 +1,6 @@
 using MessagePack;
+using Serilog;
+using Serilog.Events;
 using SVCommon;
 using SVCommon.Packet;
 using static SVServer.Program;
@@ -10,12 +12,12 @@ public class EventListener : PacketHandler<SvConnection>
     public override void OnPing(SvConnection conn)
     {
         conn.LastPingTime = DateTime.Now;
-        // Console.WriteLine($"Ping received from {conn.Address}");
+        Log.Verbose("Ping received from {connAd}", conn.Address);
     }
     
     public override void OnBasicMessage(SvConnection conn, BasicMessage msg)
     {
-        Console.WriteLine($"BasicMessage received from {conn.Address}: {msg.Message}");
+        Log.Information("BasicMessage received from {connAd}: {msg}", conn.Address, msg.Message);
     }
 
 
@@ -31,7 +33,7 @@ public class EventListener : PacketHandler<SvConnection>
             connection.Send(newMedia, MessageType.NewMedia);
         }
         
-        Console.WriteLine($"NewMedia received from {conn.Address}: {newMedia.Uri}");
+        Log.Information("NewMedia received from {conn}: {newMediaUri}", conn.Address, newMedia.Uri);
     }
 
     public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
@@ -46,12 +48,12 @@ public class EventListener : PacketHandler<SvConnection>
             connection.Send(timeSync, MessageType.TimeSync);
         }
         
-        Console.WriteLine($"TimeSync received from {conn.Address}: {timeSync.Time}");
+        Log.Verbose("TimeSync received from {conn}: {timeSyncTime}", conn.Address, timeSync.Time);
     }
 
     public override void OnLogin(SvConnection conn, Login login)
     {
-        Console.WriteLine($"Login received from {conn.Address}: {login.Nick}");
+        Log.Information("BasicMessage received from {connAd}: {nick}", conn.Address, login.Nick);
         if (conn.IsAuthenticatedSuccessfully)
         {
             return;
@@ -70,7 +72,7 @@ public class EventListener : PacketHandler<SvConnection>
             loginResponse.Host = false;
             conn.Send(loginResponse, MessageType.LoginResponse);
             DisconnectUser(conn, "User already exists!");
-            Console.WriteLine($"{login.Nick} from {conn.Address} tried to connect with taken nick!");
+            Log.Warning("{nick} from {connAd} tried to connect with taken nick!", login.Nick, conn.Address);
             return;
         }
         
@@ -88,7 +90,7 @@ public class EventListener : PacketHandler<SvConnection>
         
         UserAuthed(conn);
         
-        Console.WriteLine($"Login approved from {conn.Address} with nick {login.Nick}");
+        Log.Information("Login approved from {connAd}: {nick}", conn.Address, login.Nick);
         
         loginResponse.Success = true;
         conn.Send(loginResponse, MessageType.LoginResponse);
@@ -110,16 +112,16 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnSerializationException(MessagePackSerializationException exception, int packetId)
     {
-        Console.WriteLine(exception);  
+        Log.Error(exception, "Exception in serialization");
     }
 
     public override void OnByteLengthMismatch(SvConnection conn, int readBytes, int totalBytes)
     {
-        Console.WriteLine($"Byte Length Mismatch - Read: {readBytes}, Total: {totalBytes}");  
+        Log.Warning("Byte Length Mismatch - Read: {readBytes}, Total: {totalBytes}", readBytes, totalBytes);
     }
 
     public override void OnPacketHandlerException(Exception exception, int packetId)
     {
-        Console.WriteLine(exception);   
+        Log.Error(exception, "Exception in packet handler"); 
     }
 }

@@ -1,4 +1,5 @@
-﻿using SVCommon;
+﻿using Serilog;
+using SVCommon;
 using SVCommon.Packet;
 using Yggdrasil.Network.TCP;
 
@@ -21,7 +22,10 @@ internal static class Program
 
     public static void Main(string[] args)
     {
-        Console.WriteLine("Server Starting");
+        Log.Logger = new LoggerConfiguration().WriteTo.Console(outputTemplate:
+            "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}").MinimumLevel.Debug().CreateLogger();
+        
+        Log.Information("Server Started!");
         
         _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
         _tcpConnectionAcceptor.AcceptionException += TcpConnectionAcceptorOnAcceptionException;
@@ -34,12 +38,12 @@ internal static class Program
 
     private static void TcpConnectionAcceptorOnConnectionClosed(SvConnection conn, ConnectionCloseType closeType)
     {
-        Console.WriteLine($"Connection with {conn.Address} was {closeType.ToString().ToLower()}");
+        Log.Warning("Connection with {connectionAd} was {closeType}", conn.Address, closeType.ToString().ToLower());
     }
 
     private static void TcpConnectionAcceptorOnAcceptionException(Exception obj)
     {
-        Console.WriteLine(obj);
+        Log.Error(obj, "Exception in Tcp Connection Acceptor");
     }
 
     private static void AddConnection(SvConnection conn)
@@ -49,7 +53,7 @@ internal static class Program
         lock (_unAuthedUsers)
         {
             _unAuthedUsers.Add(conn);
-            Console.WriteLine($"User connected from {conn.Address}");
+            Log.Information("User connected from {connAd}", conn.Address);
         }
     }
 
@@ -83,7 +87,7 @@ internal static class Program
             State.CurrentMediaTime = null;
             State.Host = null;
             State.CurrentMedia = null;
-            Console.WriteLine("Last user disconnected state was cleared");
+            Log.Information("Last user disconnected, state was cleared");
             return;
         }
 
@@ -102,7 +106,7 @@ internal static class Program
         }
         
         conn.Close();
-        Console.WriteLine($"Disconnected user from {conn.Address}");
+        Log.Information("Disconnected user from {connAd}", conn.Address);
         
         
     }
@@ -132,7 +136,6 @@ internal static class Program
     {
         while (true)
         {
-            // Console.WriteLine("Doing Loop");
             if (DateTime.Now.Subtract(LastAuthUserCheck).TotalMilliseconds >= 10000)
             {
                 lock (_unAuthedUsers)
@@ -143,8 +146,8 @@ internal static class Program
                     {
                         if (DateTime.Now.Subtract(conn.ConnectionOpened).TotalSeconds <= 10)
                             continue;
-
-                        Console.WriteLine($"Kicked user from {conn.Address} for not sending login within 10 seconds");
+                        
+                        Log.Information("Kicked user from {connAd} for not sending login within 10 seconds", conn.Address);
 
                         DisconnectUser(conn, "Login timeout reached!");
                     }
@@ -162,9 +165,10 @@ internal static class Program
                     connection.SendPing();
                 }
             }
-
+            Log.Verbose("Server loop done");
             Thread.Sleep(1000);
         }
+        Log.CloseAndFlush();
         // ReSharper disable once FunctionNeverReturns
     }
 }
