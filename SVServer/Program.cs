@@ -23,7 +23,7 @@ internal static class Program
     public static void Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration().WriteTo.Console(outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}").MinimumLevel.Verbose().CreateLogger();
+            "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}").MinimumLevel.Debug().CreateLogger();
         
         Log.Information("Server Started!");
         
@@ -108,15 +108,6 @@ internal static class Program
         }
         Log.Information("Disconnected user from {connAd}", conn.Address);
         conn.Close();
-
-        var userLeave = new UserLeave
-        {
-            Nick = conn.Nick
-        };
-        foreach (SvConnection connection in ConnectedUsers)
-        {
-            connection.Send(userLeave, MessageType.UserLeave);
-        }
     }
 
     public static void UserAuthed(SvConnection conn)
