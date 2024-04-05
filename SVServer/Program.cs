@@ -24,9 +24,9 @@ internal static class Program
     {
         Log.Logger = new LoggerConfiguration().WriteTo.Console(outputTemplate:
             "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}").MinimumLevel.Debug().CreateLogger();
-        
+
         Log.Information("Server Started!");
-        
+
         _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
         _tcpConnectionAcceptor.AcceptionException += TcpConnectionAcceptorOnAcceptionException;
         _tcpConnectionAcceptor.ConnectionClosed += TcpConnectionAcceptorOnConnectionClosed;
@@ -60,9 +60,9 @@ internal static class Program
     public static void DisconnectUser(SvConnection conn, string? message = null)
     {
         if (conn.UserDisconnected) return;
-        
+
         conn.UserDisconnected = true;
-        
+
         if (message != null)
         {
             var disconnectMessage = new DisconnectMessage
@@ -107,6 +107,7 @@ internal static class Program
                 connection.Send(hostChange, MessageType.HostChange);
             }
         }
+
         Log.Information("Disconnected user from {connAd}", conn.Address);
         conn.Close();
 
@@ -137,7 +138,7 @@ internal static class Program
         {
             connection.Send(userJoin, MessageType.UserJoin);
         }
-        
+
         ConnectedUsers.Add(conn);
     }
 
@@ -150,19 +151,20 @@ internal static class Program
                 lock (_unAuthedUsers)
                 {
                     SvConnection[] usersToCheck = _unAuthedUsers.ToArray();
-                    
+
                     foreach (SvConnection conn in usersToCheck)
                     {
                         if (DateTime.Now.Subtract(conn.ConnectionOpened).TotalSeconds <= 10)
                             continue;
-                        
-                        Log.Information("Kicked user from {connAd} for not sending login within 10 seconds", conn.Address);
+
+                        Log.Information("Kicked user from {connAd} for not sending login within 10 seconds",
+                            conn.Address);
 
                         DisconnectUser(conn, "Login timeout reached!");
                     }
                 }
             }
-            
+
             if (DateTime.Now.Subtract(LastPingCheck).TotalMilliseconds >= 10000)
             {
                 foreach (SvConnection connection in ConnectedUsers)
@@ -171,12 +173,15 @@ internal static class Program
                     {
                         DisconnectUser(connection, "Client stopped responding to pings");
                     }
+
                     connection.SendPing();
                 }
             }
+
             Log.Verbose("Server loop done");
             Thread.Sleep(1000);
         }
+
         Log.CloseAndFlush();
         // ReSharper disable once FunctionNeverReturns
     }
