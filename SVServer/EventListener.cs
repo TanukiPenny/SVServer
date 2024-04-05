@@ -20,12 +20,42 @@ public class EventListener : PacketHandler<SvConnection>
         Log.Information("BasicMessage received from {connAd}: {msg}", conn.Address, msg.Message);
     }
 
+    public override void OnPause(SvConnection conn)
+    {
+        if (Program.State.Host != conn) return;
+        
+        Program.State.Paused = false;
+        
+        foreach (SvConnection connection in ConnectedUsers)
+        {
+            if (Program.State.Host == connection) continue;
+            connection.Send(new Pause(), MessageType.Pause);
+        }
+    }
+
+    public override void OnStop(SvConnection conn)
+    {
+        if (Program.State.Host != conn) return;
+        
+        Program.State.CurrentMediaTime = null;
+        Program.State.Host = null;
+        Program.State.CurrentMedia = null;
+        Program.State.Paused = null;
+        Log.Information("Stop received, state was cleared");
+        
+        foreach (SvConnection connection in ConnectedUsers)
+        {
+            if (Program.State.Host == connection) continue;
+            connection.Send(new Stop(), MessageType.Stop);
+        }
+    }
 
     public override void OnPlay(SvConnection conn, Play play)
     {
         if (conn != Program.State.Host) return;
         
         Program.State.CurrentMedia = play.Uri;
+        Program.State.Paused = false;
 
         foreach (SvConnection connection in ConnectedUsers)
         {
@@ -134,6 +164,9 @@ public class EventListener : PacketHandler<SvConnection>
             Time = (long)Program.State.CurrentMediaTime
         };
         conn.Send(timeSync, MessageType.TimeSync);
+        
+        if (Program.State.Paused == null || Program.State.Paused == false) return;
+        conn.Send(new Pause(), MessageType.Pause);
     }
 
     public override void OnSerializationException(MessagePackSerializationException exception, int packetId)

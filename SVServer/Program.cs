@@ -89,6 +89,7 @@ internal static class Program
             State.CurrentMediaTime = null;
             State.Host = null;
             State.CurrentMedia = null;
+            State.Paused = null;
             Log.Information("Last user disconnected, state was cleared");
             return;
         }
