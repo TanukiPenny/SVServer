@@ -104,7 +104,7 @@ internal static class Program
                 connection.Send(hostChange, MessageType.HostChange);
             }
         }
-        
+        Console.Write("Awa");
         Log.Information("Disconnected user from {connAd}", conn.Address);
         conn.Close();
     }
