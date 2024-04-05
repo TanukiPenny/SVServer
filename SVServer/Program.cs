@@ -126,6 +126,11 @@ internal static class Program
         foreach (SvConnection connection in ConnectedUsers)
         {
             connection.Send(userJoin, MessageType.UserJoin);
+            var userJoin1 = new UserJoin
+            {
+                Nick = connection.Nick
+            };
+            conn.Send(userJoin1, MessageType.UserJoin);
         }
         
         ConnectedUsers.Add(conn);
