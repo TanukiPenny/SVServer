@@ -110,6 +110,16 @@ public class EventListener : PacketHandler<SvConnection>
         
         loginResponse.Success = true;
         conn.Send(loginResponse, MessageType.LoginResponse);
+        
+        foreach (SvConnection connection in ConnectedUsers)
+        {
+            if (conn == connection) continue;
+            var userJoin = new UserJoin
+            {
+                Nick = connection.Nick
+            };
+            conn.Send(userJoin, MessageType.UserJoin);
+        }
 
         if (Program.State.CurrentMedia == null) return;
         var newMedia = new NewMedia
@@ -124,17 +134,6 @@ public class EventListener : PacketHandler<SvConnection>
             Time = (long)Program.State.CurrentMediaTime
         };
         conn.Send(timeSync, MessageType.TimeSync);
-
-        foreach (SvConnection connection in ConnectedUsers)
-        {
-            Console.WriteLine(connection.Nick);
-            if (conn == connection) continue;
-            var userJoin = new UserJoin
-            {
-                Nick = connection.Nick
-            };
-            conn.Send(userJoin, MessageType.UserJoin);
-        }
     }
 
     public override void OnSerializationException(MessagePackSerializationException exception, int packetId)
