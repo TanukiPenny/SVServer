@@ -65,6 +65,16 @@ public class EventListener : PacketHandler<SvConnection>
         }
 
         var loginResponse = new LoginResponse();
+
+        if (login.Nick.Length < 3)
+        {
+            loginResponse.Success = false;
+            loginResponse.Host = false;
+            conn.Send(loginResponse, MessageType.LoginResponse);
+            Log.Warning("{nick} from {connAd} tried to connect with a nick under 3 characters!", login.Nick, conn.Address);
+            DisconnectUser(conn, "Nick to short!");
+            return;
+        }
         
         if (ConnectedUsers.Exists(c => c.Nick == login.Nick))
         {
@@ -72,7 +82,7 @@ public class EventListener : PacketHandler<SvConnection>
             loginResponse.Host = false;
             conn.Send(loginResponse, MessageType.LoginResponse);
             Log.Warning("{nick} from {connAd} tried to connect with taken nick!", login.Nick, conn.Address);
-            DisconnectUser(conn, "User already exists!");
+            DisconnectUser(conn, "Nick already exists!");
             return;
         }
         
