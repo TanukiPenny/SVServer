@@ -21,19 +21,19 @@ public class EventListener : PacketHandler<SvConnection>
     }
 
 
-    public override void OnNewMedia(SvConnection conn, NewMedia newMedia)
+    public override void OnPlay(SvConnection conn, Play play)
     {
         if (conn != Program.State.Host) return;
         
-        Program.State.CurrentMedia = newMedia.Uri;
+        Program.State.CurrentMedia = play.Uri;
 
         foreach (SvConnection connection in ConnectedUsers)
         {
             if (Program.State.Host == connection) continue;
-            connection.Send(newMedia, MessageType.NewMedia);
+            connection.Send(play, MessageType.Play);
         }
         
-        Log.Information("NewMedia received from {conn}: {newMediaUri}", conn.Address, newMedia.Uri);
+        Log.Information("NewMedia received from {conn}: {playUri}", conn.Address, play.Uri);
     }
 
     public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
@@ -122,11 +122,11 @@ public class EventListener : PacketHandler<SvConnection>
         }
 
         if (Program.State.CurrentMedia == null) return;
-        var newMedia = new NewMedia
+        var play = new Play
         {
             Uri = Program.State.CurrentMedia
         };
-        conn.Send(newMedia, MessageType.NewMedia);
+        conn.Send(play, MessageType.Play);
         
         if (Program.State.CurrentMediaTime == null) return;
         var timeSync = new TimeSync
