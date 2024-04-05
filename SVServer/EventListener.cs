@@ -53,7 +53,7 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnLogin(SvConnection conn, Login login)
     {
-        Log.Information("BasicMessage received from {connAd}: {nick}", conn.Address, login.Nick);
+        Log.Information("Login received from {connAd}: {nick}", conn.Address, login.Nick);
         if (conn.IsAuthenticatedSuccessfully)
         {
             return;
@@ -71,8 +71,8 @@ public class EventListener : PacketHandler<SvConnection>
             loginResponse.Success = false;
             loginResponse.Host = false;
             conn.Send(loginResponse, MessageType.LoginResponse);
-            DisconnectUser(conn, "User already exists!");
             Log.Warning("{nick} from {connAd} tried to connect with taken nick!", login.Nick, conn.Address);
+            DisconnectUser(conn, "User already exists!");
             return;
         }
         

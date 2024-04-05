@@ -105,10 +105,8 @@ internal static class Program
             }
         }
         
-        conn.Close();
         Log.Information("Disconnected user from {connAd}", conn.Address);
-        
-        
+        conn.Close();
     }
 
     public static void UserAuthed(SvConnection conn)
