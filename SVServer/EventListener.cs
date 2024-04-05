@@ -44,7 +44,7 @@ public class EventListener : PacketHandler<SvConnection>
         
         foreach (SvConnection connection in ConnectedUsers)
         {
-            if (Program.State.Host == conn) continue;
+            if (Program.State.Host == connection) continue;
             connection.Send(timeSync, MessageType.TimeSync);
         }
         
