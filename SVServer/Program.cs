@@ -10,7 +10,7 @@ internal static class Program
     public static List<SvConnection> ConnectedUsers = new();
     private static List<SvConnection> _unAuthedUsers = new();
 
-    private static TcpConnectionAcceptor<SvConnection> _tcpConnectionAcceptor = new("172.22.0.1", 9052);
+    private static TcpConnectionAcceptor<SvConnection> _tcpConnectionAcceptor = new(9052);
     public static EventListener EventListener = new();
     public static State State = new();
 
