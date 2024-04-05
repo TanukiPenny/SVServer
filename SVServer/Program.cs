@@ -23,7 +23,7 @@ internal static class Program
     public static void Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration().WriteTo.Console(outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}").MinimumLevel.Verbose().CreateLogger();
+            "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}").MinimumLevel.Debug().CreateLogger();
         
         Log.Information("Server Started!");
         
