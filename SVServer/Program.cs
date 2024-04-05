@@ -59,8 +59,10 @@ internal static class Program
 
     public static void DisconnectUser(SvConnection conn, string? message = null)
     {
+        if (conn.UserDisconnected) return;
+        
         conn.UserDisconnected = true;
-
+        
         if (message != null)
         {
             var disconnectMessage = new DisconnectMessage
@@ -104,7 +106,6 @@ internal static class Program
                 connection.Send(hostChange, MessageType.HostChange);
             }
         }
-        Console.Write("Awa");
         Log.Information("Disconnected user from {connAd}", conn.Address);
         conn.Close();
     }
