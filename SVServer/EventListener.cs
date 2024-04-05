@@ -54,18 +54,24 @@ public class EventListener : PacketHandler<SvConnection>
     public override void OnLogin(SvConnection conn, Login login)
     {
         Log.Information("Login received from {connAd}: {nick}", conn.Address, login.Nick);
+        
         if (conn.IsAuthenticatedSuccessfully)
         {
             return;
         }
+        
+        var loginResponse = new LoginResponse();
 
         if (ConnectedUsers.Count >= 10)
         {
+            loginResponse.Success = false;
+            loginResponse.Host = false;
+            conn.Send(loginResponse, MessageType.LoginResponse);
+            Log.Warning("{nick} from {connAd} tried to connect when the server was full!", login.Nick, conn.Address);
             DisconnectUser(conn, "Server is full, please try again later!");
+            return;
         }
-
-        var loginResponse = new LoginResponse();
-
+        
         if (login.Nick.Length < 3)
         {
             loginResponse.Success = false;
