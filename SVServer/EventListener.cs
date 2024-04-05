@@ -127,6 +127,7 @@ public class EventListener : PacketHandler<SvConnection>
 
         foreach (SvConnection connection in ConnectedUsers)
         {
+            Console.WriteLine(connection.Nick);
             if (conn == connection) continue;
             var userJoin = new UserJoin
             {
