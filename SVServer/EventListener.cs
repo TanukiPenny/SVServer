@@ -151,6 +151,12 @@ public class EventListener : PacketHandler<SvConnection>
             conn.Send(userJoin, MessageType.UserJoin);
         }
 
+        var hostChange = new HostChange
+        {
+            Nick = Program.State.Host?.Nick
+        };
+        conn.Send(hostChange, MessageType.HostChange);
+
         if (Program.State.CurrentMedia == null) return;
         var play = new Play
         {
