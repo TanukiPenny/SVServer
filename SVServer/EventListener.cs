@@ -24,13 +24,15 @@ public class EventListener : PacketHandler<SvConnection>
     {
         if (Program.State.Host != conn) return;
         
-        Program.State.Paused = false;
+        Program.State.Paused = true;
         
         foreach (SvConnection connection in ConnectedUsers)
         {
             if (Program.State.Host == connection) continue;
             connection.Send(new Pause(), MessageType.Pause);
         }
+        
+        Log.Information("Pause received from {connAd}", conn.Address);
     }
 
     public override void OnStop(SvConnection conn)
@@ -63,7 +65,7 @@ public class EventListener : PacketHandler<SvConnection>
             connection.Send(play, MessageType.Play);
         }
         
-        Log.Information("NewMedia received from {conn}: {playUri}", conn.Address, play.Uri);
+        Log.Information("Play received from {conn}: {playUri}", conn.Address, play.Uri);
     }
 
     public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
