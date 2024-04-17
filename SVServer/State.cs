@@ -1,3 +1,4 @@
+// PB start
 namespace SVServer;
 
 public class State
@@ -7,3 +8,4 @@ public class State
     public long? CurrentMediaTime;
     public bool? Paused;
 }
+// PB end
