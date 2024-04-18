@@ -21,6 +21,16 @@ public class EventListener : PacketHandler<SvConnection>
         Log.Information("BasicMessage received from {connAd}: {msg}", conn.Address, msg.Message);
     }
 
+    public override void OnChatMessage(SvConnection conn, ChatMessage msg)
+    {
+        foreach (SvConnection connection in ConnectedUsers)
+        {
+            connection.Send(msg, MessageType.ChatMessage);
+        }
+        
+        Log.Information("ChatMessage received from {connAd}", conn.Address);
+    }
+
     public override void OnPause(SvConnection conn)
     {
         if (Program.State.Host != conn) return;
