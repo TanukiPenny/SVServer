@@ -12,6 +12,7 @@ public class EventListener : PacketHandler<SvConnection>
 {
     public override void OnPing(SvConnection conn)
     {
+        // Keep track of last ping response for each connection
         conn.LastPingTime = DateTime.Now;
         Log.Verbose("Ping received from {connAd}", conn.Address);
     }
@@ -23,6 +24,7 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnChatMessage(SvConnection conn, ChatMessage msg)
     {
+        // Forward chat message to everyone
         foreach (SvConnection connection in ConnectedUsers)
         {
             connection.Send(msg, MessageType.ChatMessage);
@@ -33,10 +35,12 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnPause(SvConnection conn)
     {
+        // if not host return
         if (Program.State.Host != conn) return;
         
         Program.State.Paused = true;
         
+        // Forward to everyone but host
         foreach (SvConnection connection in ConnectedUsers)
         {
             if (Program.State.Host == connection) continue;
@@ -48,14 +52,17 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnStop(SvConnection conn)
     {
+        // if not host return
         if (Program.State.Host != conn) return;
         
+        // Reset state
         Program.State.CurrentMediaTime = null;
         Program.State.Host = null;
         Program.State.CurrentMedia = null;
         Program.State.Paused = null;
         Log.Information("Stop received, state was cleared");
         
+        // Forward to everyone but host
         foreach (SvConnection connection in ConnectedUsers)
         {
             if (Program.State.Host == connection) continue;
@@ -65,11 +72,13 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnPlay(SvConnection conn, Play play)
     {
+        // if not host return
         if (conn != Program.State.Host) return;
         
         Program.State.CurrentMedia = play.Uri;
         Program.State.Paused = false;
 
+        // Forward to everyone but host
         foreach (SvConnection connection in ConnectedUsers)
         {
             if (Program.State.Host == connection) continue;
@@ -81,10 +90,12 @@ public class EventListener : PacketHandler<SvConnection>
 
     public override void OnTimeSync(SvConnection conn, TimeSync timeSync)
     {
+        // if not host return
         if (conn != Program.State.Host) return;
         
         Program.State.CurrentMediaTime = timeSync.Time;
         
+        // Forward to everyone but host
         foreach (SvConnection connection in ConnectedUsers)
         {
             if (Program.State.Host == connection) continue;
@@ -98,13 +109,16 @@ public class EventListener : PacketHandler<SvConnection>
     {
         Log.Information("Login received from {connAd}: {nick}", conn.Address, login.Nick);
         
+        // Only run for people that are unauthed
         if (conn.IsAuthenticatedSuccessfully)
         {
             return;
         }
         
+        // Create response
         var loginResponse = new LoginResponse();
 
+        // Kicked if to many people connected
         if (ConnectedUsers.Count >= 10)
         {
             loginResponse.Success = false;
@@ -115,6 +129,7 @@ public class EventListener : PacketHandler<SvConnection>
             return;
         }
         
+        // kick if nick is too short
         if (login.Nick.Length < 3)
         {
             loginResponse.Success = false;
@@ -125,6 +140,7 @@ public class EventListener : PacketHandler<SvConnection>
             return;
         }
         
+        // kick if nick already exists
         if (ConnectedUsers.Exists(c => c.Nick == login.Nick))
         {
             loginResponse.Success = false;
@@ -135,6 +151,7 @@ public class EventListener : PacketHandler<SvConnection>
             return;
         }
         
+        // assign host if first connection
         if (ConnectedUsers.Count == 0)
         {
             Program.State.Host = conn;
@@ -145,15 +162,19 @@ public class EventListener : PacketHandler<SvConnection>
             loginResponse.Host = false;
         }
 
+        // and nick to connection
         conn.FillUserInfo(login.Nick);
         
+        // Auth user
         UserAuthed(conn);
         
         Log.Information("Login approved from {connAd}: {nick}", conn.Address, login.Nick);
         
+        // Send login response
         loginResponse.Success = true;
         conn.Send(loginResponse, MessageType.LoginResponse);
         
+        // Send joins of users already connected
         foreach (SvConnection connection in ConnectedUsers)
         {
             if (conn == connection) continue;
@@ -164,12 +185,14 @@ public class EventListener : PacketHandler<SvConnection>
             conn.Send(userJoin, MessageType.UserJoin);
         }
 
+        // Send host info
         var hostChange = new HostChange
         {
             Nick = Program.State.Host?.Nick
         };
         conn.Send(hostChange, MessageType.HostChange);
 
+        // if media is playing send it
         if (Program.State.CurrentMedia == null) return;
         var play = new Play
         {

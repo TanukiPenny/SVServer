@@ -23,16 +23,21 @@ internal static class Program
 
     public static void Main(string[] args)
     {
+        // Create logger
         Log.Logger = new LoggerConfiguration().WriteTo.Console(outputTemplate:
             "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}").MinimumLevel.Debug().CreateLogger();
 
         Log.Information("Server Started!");
 
+        // Add callbacks for connection acceptor
         _tcpConnectionAcceptor.ConnectionAccepted += AddConnection;
         _tcpConnectionAcceptor.AcceptionException += TcpConnectionAcceptorOnAcceptionException;
         _tcpConnectionAcceptor.ConnectionClosed += TcpConnectionAcceptorOnConnectionClosed;
+        
+        // Start listening for connections
         _tcpConnectionAcceptor.Listen();
 
+        // Start loop thread
         _serverLoopThread = new Thread(ServerLoop);
         _serverLoopThread.Start();
     }
@@ -49,10 +54,12 @@ internal static class Program
 
     private static void AddConnection(SvConnection conn)
     {
+        // Send connection is closed run disconnecting logic
         conn.Closed += (_, _) => { DisconnectUser(conn); };
 
         lock (_unAuthedUsers)
         {
+            // Add user to list of unauthed users
             _unAuthedUsers.Add(conn);
             Log.Information("User connected from {connAd}", conn.Address);
         }
@@ -60,10 +67,12 @@ internal static class Program
 
     public static void DisconnectUser(SvConnection conn, string? message = null)
     {
+        // Only do this once per connection
         if (conn.UserDisconnected) return;
 
         conn.UserDisconnected = true;
 
+        // Send disconnect message if there is one
         if (message != null)
         {
             var disconnectMessage = new DisconnectMessage
@@ -73,6 +82,7 @@ internal static class Program
             conn.Send(disconnectMessage, MessageType.DisconnectMessage);
         }
 
+        // Remove connection from list its in
         if (conn.IsAuthenticatedSuccessfully)
         {
             ConnectedUsers.Remove(conn);
@@ -85,6 +95,7 @@ internal static class Program
             }
         }
 
+        // Clear state if all users have left
         if (ConnectedUsers.Count == 0)
         {
             State.CurrentMediaTime = null;
@@ -95,6 +106,7 @@ internal static class Program
             return;
         }
 
+        // if the connection was host then do a host change
         if (conn == State.Host)
         {
             var oldestConnection = ConnectedUsers.OrderBy(connection => connection.ConnectionOpened).First();
@@ -110,8 +122,11 @@ internal static class Program
         }
 
         Log.Information("Disconnected user from {connAd}", conn.Address);
+        
+        // Close the connection
         conn.Close();
 
+        // Send user leave to everyone
         var userLeave = new UserLeave
         {
             Nick = conn.Nick
@@ -124,6 +139,7 @@ internal static class Program
 
     public static void UserAuthed(SvConnection conn)
     {
+        // remove from unauthed
         lock (_unAuthedUsers)
         {
             _unAuthedUsers.Remove(conn);
@@ -131,6 +147,7 @@ internal static class Program
 
         conn.IsAuthenticatedSuccessfully = true;
 
+        // Send user join to everhone
         var userJoin = new UserJoin
         {
             Nick = conn.Nick
@@ -140,6 +157,7 @@ internal static class Program
             connection.Send(userJoin, MessageType.UserJoin);
         }
 
+        // Add to connected users
         ConnectedUsers.Add(conn);
     }
 
@@ -147,6 +165,7 @@ internal static class Program
     {
         while (true)
         {
+            // Check every 10 seconds for users that have not authed and kick them
             if (DateTime.Now.Subtract(LastAuthUserCheck).TotalMilliseconds >= 10000)
             {
                 lock (_unAuthedUsers)
@@ -166,6 +185,7 @@ internal static class Program
                 }
             }
 
+            // Send pings to everyone and kick if no response in 30 seconds
             if (DateTime.Now.Subtract(LastPingCheck).TotalMilliseconds >= 10000)
             {
                 foreach (SvConnection connection in ConnectedUsers)

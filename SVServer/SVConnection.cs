@@ -16,6 +16,7 @@ public class SvConnection : TcpConnection
 
     private readonly LengthPrefixFramer _framer = new(20000);
 
+    // Override to hand incoming data to the framer
     protected override void ReceiveData(byte[] buffer, int length)
     {
         if (UserDisconnected) return;
@@ -32,6 +33,7 @@ public class SvConnection : TcpConnection
         Nick = nick;
     }
 
+    // Send packet
     public void Send<T>(T obj, MessageType packetId)
     {
         List<byte> bytes = new();
@@ -40,6 +42,7 @@ public class SvConnection : TcpConnection
         Send(_framer.Frame(bytes.ToArray()));
     }
     
+    // Send ping
     public void SendPing()
     {
         List<byte> bytes = new();
@@ -47,19 +50,23 @@ public class SvConnection : TcpConnection
         Send(_framer.Frame(bytes.ToArray()));
     }
 
+    // Parse data after framed
     private void FramerReceiveData(byte[] bytes)
     {
+        // If less then the size of an int then return, not good data
         if (bytes.Length < sizeof(int))
         {
             return;
         }
 
+        // Get packet id from first bytes
         int packetId = BitConverter.ToInt32(bytes, 0);
 
+        // Make array of data after packet id
         byte[] finalBytes = new byte[bytes.Length - sizeof(int)];
-
         Array.Copy(bytes, sizeof(int), finalBytes, 0, finalBytes.Length);
 
+        // Send to packet handler
         Program.EventListener?.HandlePacket(this, finalBytes, packetId);
     }
 }
